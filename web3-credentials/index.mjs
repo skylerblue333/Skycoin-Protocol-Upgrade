@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 const SAFE_TYPE = /^[A-Za-z][A-Za-z0-9._:-]{0,63}$/;
+const SAFE_DID = /^did:[a-z0-9]{1,32}:[A-Za-z0-9._:%-]{1,200}$/;
 const MAX_TYPES = 16;
 const MAX_CLAIMS = 64;
 
@@ -13,9 +14,7 @@ function assertString(value, field, max = 512) {
 
 function assertDid(value, field) {
   const did = assertString(value, field, 256);
-  if (!/^did:[a-z0-9]+:[A-Za-z0-9._:%-]+(?:[/:?#][A-Za-z0-9._~:/?#[\]@!$&'()*+,;=%-]*)?$/.test(did)) {
-    throw new Error(`invalid_${field}`);
-  }
+  if (!SAFE_DID.test(did)) throw new Error(`invalid_${field}`);
   return did;
 }
 
