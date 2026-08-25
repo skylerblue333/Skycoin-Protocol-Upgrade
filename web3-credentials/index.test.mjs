@@ -28,6 +28,12 @@ test('creates deterministic metadata regardless of claim/type order', () => {
   assert.equal(first.chainWritePerformed, false);
 });
 
+test('canonical fingerprint ordering is code-unit deterministic for non-ASCII claim keys', () => {
+  const first = createCredentialMetadata({ ...base, claims: { z: 1, ä: 2, alpha: 3 } });
+  const second = createCredentialMetadata({ ...base, claims: { alpha: 3, ä: 2, z: 1 } });
+  assert.equal(first.fingerprint, second.fingerprint);
+});
+
 test('builds a verification plan without pretending checks ran', () => {
   const plan = buildVerificationPlan(base);
   assert.equal(plan.verificationPerformed, false);
@@ -38,6 +44,16 @@ test('builds a verification plan without pretending checks ran', () => {
     'schema',
   ]);
   assert.ok(plan.checks.every((check) => check.performed === false));
+});
+
+test('rejects malformed optional schema/status values instead of treating them as absent', () => {
+  for (const bad of ['', false, 0]) {
+    assert.throws(() => createCredentialMetadata({ ...base, schema: bad }), /invalid_schema/);
+    assert.throws(() => createCredentialMetadata({ ...base, status: bad }), /invalid_status/);
+  }
+  const withoutOptionalRefs = createCredentialMetadata({ ...base, schema: null, status: undefined });
+  assert.equal(withoutOptionalRefs.schema, null);
+  assert.equal(withoutOptionalRefs.status, null);
 });
 
 test('rejects unsafe identifiers, dates, URLs and oversized type sets', () => {
