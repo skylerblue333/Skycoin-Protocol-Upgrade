@@ -30,6 +30,12 @@ function assertHttpsUrl(value, field) {
   return url.toString();
 }
 
+function compareCodeUnits(a, b) {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
 function canonicalize(value) {
   if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
   if (typeof value === 'number') {
@@ -40,7 +46,7 @@ function canonicalize(value) {
   if (typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value)
-        .sort(([a], [b]) => a.localeCompare(b))
+        .sort(([a], [b]) => compareCodeUnits(a, b))
         .map(([key, nested]) => [key, canonicalize(nested)]),
     );
   }
@@ -73,9 +79,9 @@ export function createCredentialMetadata(input) {
     const value = assertString(type, 'type', 64);
     if (!SAFE_TYPE.test(value)) throw new Error('invalid_type');
     return value;
-  }))].sort();
-  const schema = input.schema ? assertHttpsUrl(input.schema, 'schema') : null;
-  const status = input.status ? assertHttpsUrl(input.status, 'status') : null;
+  }))].sort(compareCodeUnits);
+  const schema = input.schema === undefined || input.schema === null ? null : assertHttpsUrl(input.schema, 'schema');
+  const status = input.status === undefined || input.status === null ? null : assertHttpsUrl(input.status, 'status');
   const claims = validateClaims(input.claims);
 
   const issuedAt = assertString(input.issuedAt, 'issued_at', 40);
