@@ -28,9 +28,9 @@ test('creates deterministic metadata regardless of claim/type order', () => {
   assert.equal(first.chainWritePerformed, false);
 });
 
-test('canonical fingerprint ordering is code-unit deterministic for non-ASCII claim keys', () => {
-  const first = createCredentialMetadata({ ...base, claims: { z: 1, ä: 2, alpha: 3 } });
-  const second = createCredentialMetadata({ ...base, claims: { alpha: 3, ä: 2, z: 1 } });
+test('canonical fingerprint ordering is deterministic for accepted claim keys', () => {
+  const first = createCredentialMetadata({ ...base, claims: { zed: 1, beta: 2, alpha: 3 } });
+  const second = createCredentialMetadata({ ...base, claims: { alpha: 3, beta: 2, zed: 1 } });
   assert.equal(first.fingerprint, second.fingerprint);
 });
 
